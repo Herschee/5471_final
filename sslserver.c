@@ -1,7 +1,7 @@
 //SSL-Server.c
 #include <errno.h>
 #include <unistd.h>
-#include <malloc.h>
+#include <malloc/malloc.h>
 #include <string.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -55,7 +55,7 @@ char **createAuds(int num){
 	char **auditorList = malloc((sizeof(char*) * num));
 	for(i = 0; i < num; i++){
 		char *audString = malloc(sizeof(char)*strlen(audLenString));
-		char id[1];
+		char id[2];
 		sprintf(id, "%d", i);
 		strcpy(audString, "auditor");
 		char *cpy = malloc(sizeof(char)*strlen(audLenString));
@@ -97,13 +97,12 @@ int sendToRemainingAuds(char *request, char **listAuds, int numAuds){
 			
 		}
 		auditorSign[z] = '\0';
-		char testAud[] = "auditor";
-		char id[1];
+		char testAud[] = "auditor\0";
+		char id[2];
 		t = i;
 		t = t - 1;
 		sprintf(id, "%d", t);
 		printf("%s\n",id);
-		char testAud2[9];
 		strcat(testAud, id);
 		printf("%s\n",testAud);
 		printf("%s\n", auditorSign);
@@ -300,13 +299,14 @@ int main(int count, char *strings[])
 	for(j = 0; j< strlen(buffer)-27; j++){
 		certificate[j] = buffer[j];
 	} 
-	
 	char **auditors = createAuds(numAuds);
 	int i;
-	
+
+	printf("%s\n",auditors[0]);	
 	int certFlag = 0;
 	if(check(certificate,auditors,numAuds)){
 		certFlag = 1;
+		printf("here\n");
 	}
 	
 	
