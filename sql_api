@@ -1,0 +1,88 @@
+<?php
+
+// parameter: i 
+	// query type: 0 for recording certificates, 1 for validating auditors
+	// padding functions included below.
+	
+	// certificate recording: index, certificate, session 
+	// auditor validation: auditor key, decryption key (padded key? to unpad?)
+	
+// Begin
+function padIt($q, $id) {
+    $qEncoded = $q + "|" + $id; // pad auditor id to cert
+    return( $qEncoded );
+}
+
+function unPadIt( $p ) {
+    $pieces = explode("|", $p);
+	$qDecoded = $pieces[1]; // un pad to retrieve aud id from concatted string
+    return( $qDecoded );    // left shift pad
+}
+
+
+// for cert, there will be sessionID and cert.  
+// There will be a second table for the auditors: auditorID and and decryption key.
+
+
+// Database
+	// initation connection
+	// tables: certificates, auditors 
+	
+$mysql_host = "mysql.dabberz.com";
+$mysql_database = "zero_69db";
+$mysql_user = "zero_69";
+$mysql_password = "R41J34pi";
+$index = mysql_escape_string($_GET['i']);
+
+	if ($index == 0) {
+		// record certificate
+		$con = mysql_connect($mysql_host, $mysql_user, $mysql_password);
+		if (!$con)
+		{
+			die('Could not connect: ' . mysql_error());
+		}
+
+		mysql_select_db($mysql_database, $con);	
+
+		$index = mysql_escape_string($_GET['index']);
+		$cert = mysql_escape_string($_GET['cert']);
+		//$aud_key = mysql_escape_string($_POST['aud_key'])
+		//$timestamp = mysql_escape_string($_POST['auth']);
+		$session = $_SESSION[$cert]; // session doesn't work right now. Maybe insert something else?
+
+		$result = mysql_query("INSERT INTO certificates (`index`, `cert`, `session`, `timestamp`, `ref`) 
+		VALUES ('$index', '$cert', '$session', '', '');");
+
+		if ($result) {
+			echo ("hey");
+		   die("cert inserted sucessfully");
+		}
+
+		mysql_close($con);
+	} elseif ($index == 1) {
+		// validate via auditor
+		$con = mysql_connect($mysql_host, $mysql_user, $mysql_password);
+		if (!$con)
+		{
+			die('Could not connect: ' . mysql_error());
+		}
+
+		mysql_select_db($mysql_database, $con);	
+
+		$aud_id = mysql_escape_string($_GET['aud_id']);
+		$d = mysql_escape_string($_GET['d_key']);
+		//$session = $_SESSION[$cert];
+		
+		$result = mysql_query("SELECT * FROM auditors WHERE aud_id='$aud_id'");
+
+		while($row = mysql_fetch_array($result))
+		{
+		   die($row['d']);
+		}
+
+	mysql_close($con);
+	} else {
+		// no i specified
+	}
+
+?>
